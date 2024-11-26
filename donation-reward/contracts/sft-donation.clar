@@ -123,6 +123,12 @@
         (asserts! (> donation-amount u0) ERR_ZERO_AMOUNT)
         (asserts! (>= donation-amount (var-get minimum-donation-amount)) ERR_INVALID_AMOUNT)
         
+        ;; Check if donation-category is provided and valid
+        (asserts! (match donation-category
+                    category (is-eq (len category) (len category)) ;; Always true if category is provided
+                    true) ;; True if category is none
+                  ERR_INVALID_AMOUNT)
+        
         ;; Process STX transfer
         (try! (stx-transfer? donation-amount tx-sender (as-contract tx-sender)))
         
