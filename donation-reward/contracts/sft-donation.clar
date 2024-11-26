@@ -2,6 +2,23 @@
 ;; Allows users to make donations and receive donation tokens as proof
 ;; Implements features like donation tracking, rewards, and administrative controls
 
+;; Define NFT Trait
+(define-trait nft-trait
+  (
+    ;; Transfer a token from one principal to another
+    (transfer (uint principal principal) (response bool uint))
+    
+    ;; Get the owner of a specific token ID
+    (get-owner (uint) (response (optional principal) uint))
+    
+    ;; Get the last token ID (for total supply)
+    (get-last-token-id () (response uint uint))
+    
+    ;; Get the URI for a specific token
+    (get-token-uri (uint) (response (optional (string-utf8 256)) uint))
+  )
+)
+
 ;; Error Constants
 (define-constant ERR_OWNER_ONLY (err u100))
 (define-constant ERR_INVALID_AMOUNT (err u101))
@@ -51,9 +68,6 @@
         donation-category: (optional (string-ascii 64))
     }
 )
-
-;; NFT Interface
-(impl-trait 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.nft-trait)
 
 ;; SFT Interface
 (define-fungible-token donation-reward-token)
@@ -105,7 +119,7 @@
 ;; Public Functions
 (define-public (submit-donation (donation-amount uint) (donation-category (optional (string-ascii 64))))
     (begin
-        (asserts! (not contract-paused) ERR_CONTRACT_PAUSED)
+        (asserts! (not (var-get contract-paused)) ERR_CONTRACT_PAUSED)
         (asserts! (> donation-amount u0) ERR_ZERO_AMOUNT)
         (asserts! (>= donation-amount (var-get minimum-donation-amount)) ERR_INVALID_AMOUNT)
         
@@ -149,7 +163,7 @@
         (donor-record (get-donor-records tx-sender))
     )
     (begin
-        (asserts! (not contract-paused) ERR_CONTRACT_PAUSED)
+        (asserts! (not (var-get contract-paused)) ERR_CONTRACT_PAUSED)
         (asserts! (>= (get lifetime-donation-amount donor-record) 
             (* (var-get minimum-donation-amount) MINIMUM_REWARD_THRESHOLD_MULTIPLIER)) 
             ERR_INSUFFICIENT_BALANCE)

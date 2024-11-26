@@ -5,6 +5,7 @@ authors = []
 telemetry = true
 cache_dir = '.\.cache'
 requirements = []
+
 [contracts.sft-donation]
 path = 'contracts/sft-donation.clar'
 clarity_version = 2
